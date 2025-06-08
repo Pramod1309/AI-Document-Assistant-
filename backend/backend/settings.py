@@ -1,43 +1,39 @@
 import os
 from pathlib import Path
-from dotenv import load_dotenv
+import dj_database_url
 
-# Load environment variables from .env file
-load_dotenv()
-
-# Define Base Directory
+# Base Directory
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Get Secret Key from .env
-SECRET_KEY = os.getenv("SECRET_KEY", "fallback-secret-key")
-
-# Debug Mode
-DEBUG = os.getenv("DEBUG", "True") == "True"
-
-# Allowed Hosts 
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
-
+# Security
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'fallback-secret-key')
+DEBUG = os.environ.get('RENDER') != 'true'  # False in production
+ALLOWED_HOSTS = [
+    os.environ.get('RENDER_EXTERNAL_HOSTNAME', ''),
+    'localhost',
+    '127.0.0.1',
+]
 
 # CORS Configuration
-CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173").split(",")
-CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173").split(",")
+CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', 'https://ai-document-assistant-frontend.onrender.com').split(',')
+CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'https://ai-document-assistant-frontend.onrender.com').split(',')
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_ALL_ORIGINS = False  # Enable only allowed origins
-CORS_DEBUG = True
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_DEBUG = False  # Disable in production
 
-#for celery connection
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+# Celery Configuration
+CELERY_BROKER_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
 
-# Application definition
+# Application Definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
-    'django.contrib.sites', 
+    'django.contrib.sites',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -49,53 +45,47 @@ INSTALLED_APPS = [
     'operation',
     'corsheaders',
     'rest_framework',
-    
-    
 ]
 
 AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',  # Django's default
-    'allauth.account.auth_backends.AuthenticationBackend',  # allauth backend
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-SITE_ID = 1  # Required for django-allauth
+# django-allauth Settings
+SITE_ID = 1
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_LOGIN_METHODS = {'email'}
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_VERIFICATION = 'optional'
-ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
 SOCIALACCOUNT_AUTO_SIGNUP = True
 SOCIALACCOUNT_LOGIN_ON_GET = True
 ACCOUNT_LOGOUT_ON_GET = True
 SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
 SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_LOGIN = True
-LOGIN_REDIRECT_URL = "/api/check-auth/"
-LOGOUT_REDIRECT_URL = "http://localhost:5173/"
+LOGIN_REDIRECT_URL = '/api/check-auth/'
+LOGOUT_REDIRECT_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-# Tell allauth to process login immediately on a GET request (bypassing the extra confirmation page)
- 
 
-# Google OAuth2 configuration for allauth
+# Google OAuth2 Configuration
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'APP': {
-            'client_id': '764335922653-l21ckf3e8d2933390j6j24rpedei7s59.apps.googleusercontent.com',
-            'secret': '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',  # Replace with your actual secret
-            'key': ''
+            'client_id': os.environ.get('GOOGLE_CLIENT_ID', '764335922653-l21ckf3e8d2933390j6j24rpedei7s59.apps.googleusercontent.com'),
+            'secret': os.environ.get('GOOGLE_CLIENT_SECRET', ''),
+            'key': '',
         },
-        'SCOPE': ['profile', 'email'],  # Request profile info and email
+        'SCOPE': ['profile', 'email'],
         'AUTH_PARAMS': {
-            'access_type': 'online', 
-            'prompt': 'select_account' # or 'offline' if you need refresh tokens
+            'access_type': 'online',
+            'prompt': 'select_account',
         },
         'OAUTH_PKCE_ENABLED': True,
     }
 }
 
-
-
-
-# Add logging for allauth
+# Logging
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -107,20 +97,24 @@ LOGGING = {
     'loggers': {
         'allauth': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': 'DEBUG' if DEBUG else 'INFO',
+        },
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
         },
     },
 }
 
-# Session Settings
+# Session and CSRF Settings
 SESSION_COOKIE_AGE = 1209600  # 2 weeks
 SESSION_SAVE_EVERY_REQUEST = True
-SESSION_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = not DEBUG  # True in production
 SESSION_COOKIE_SAMESITE = 'None'
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_DOMAIN = None
 CSRF_COOKIE_SAMESITE = 'None'
-CSRF_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = not DEBUG  # True in production
 CSRF_COOKIE_HTTPONLY = True
 
 MIDDLEWARE = [
@@ -163,20 +157,13 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 # Database
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',  
-        'NAME': 'assistant',          
-        'USER': 'root',         
-        'PASSWORD': '12345',     
-        'HOST': 'localhost',                   
-        'PORT': '3306', 
-    }
+    'default': dj_database_url.parse(
+        os.environ.get('DATABASE_URL', 'sqlite:///db.sqlite3'),
+        conn_max_age=600
+    )
 }
 
-
-
-
-# Password validation
+# Password Validation
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -190,19 +177,28 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# Static files
-STATIC_URL = 'static/'
+# Static Files
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MEDIA_URL = "/media/"
-MEDIA_ROOT = os.path.join(BASE_DIR, "backend", "media")  # Updated to match the actual media directory
-TEMP_DIR = os.path.join(MEDIA_ROOT, "temp")
-PROCESSED_DIR = os.path.join(MEDIA_ROOT, "processed")
-os.makedirs(TEMP_DIR, exist_ok=True)
-os.makedirs(PROCESSED_DIR, exist_ok=True)
+# Media Files
+if os.environ.get('AWS_STORAGE_BUCKET_NAME'):
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+    AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    AWS_S3_REGION_NAME = 'us-east-1'  # Update to your region
+    AWS_S3_FILE_OVERWRITE = False
+    MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/'
+else:
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+    TEMP_DIR = os.path.join(MEDIA_ROOT, 'temp')
+    PROCESSED_DIR = os.path.join(MEDIA_ROOT, 'processed')
+    os.makedirs(TEMP_DIR, exist_ok=True)
+    os.makedirs(PROCESSED_DIR, exist_ok=True)
+
 DATA_UPLOAD_MAX_NUMBER_FILES = 1000
-DEBUG = True
 APPEND_SLASH = True
-
-# Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
