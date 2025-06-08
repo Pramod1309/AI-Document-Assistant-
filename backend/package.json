@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@tensorflow/tfjs": "^4.22.0",
+    "os": "^0.1.2",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1"
+  }
+}

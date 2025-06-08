@@ -1,0 +1,135 @@
+# BE Project/.gitignore
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+wheels/
+*.whl
+pip-wheel-metadata/
+.python-version
+
+# Virtual Environments
+env/
+venv/
+ENV/
+backend/venv/
+frontend/venv/
+
+# Environment Variables
+*.env
+.env.*
+!.env.example
+
+# Django
+*.log
+*.pot
+*.sqlite3
+backend/media/
+backend/static/
+backend/staticfiles/
+migrations/
+*.pid
+*.seed
+*.dump
+*.bak.db
+manage.py.local
+
+# Node.js/React
+frontend/ai_assistant/node_modules/
+frontend/ai_assistant/dist/
+frontend/ai_assistant/build/
+frontend/ai_assistant/public/build/
+frontend/ai_assistant/.cache/
+frontend/ai_assistant/coverage/
+npm-debug.log
+yarn-error.log
+yarn.lock
+package-lock.json
+.pnpm-store/
+*.tgz
+frontend/ai_assistant/.env
+frontend/ai_assistant/.env.*
+!frontend/ai_assistant/.env.example
+
+# Vite (if using Vite for React)
+frontend/ai_assistant/vite.config.js.timestamp-*
+frontend/ai_assistant/vite.config.ts.timestamp-*
+frontend/ai_assistant/.vite/
+
+# IDE/Editor
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+*.code-workspace
+.nvim/
+*.swp
+*.swo
+
+# OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+*.lnk
+ehthumbs.db
+
+# Temporary Files
+*.bak
+*.swp
+*~
+*.tmp
+*.temp
+.TemporaryItems/
+.Trashes/
+
+# Testing/Coverage
+coverage/
+.coverage
+*.cover
+.hypothesis/
+.tox/
+.pytest_cache/
+htmlcov/
+junit.xml
+coverage.xml
+
+# Build/Deployment
+*.zip
+*.tar.gz
+*.gz
+*.bz2
+*.rar
+*.7z
+dist-files/
+release/
+out/
+
+# Render-Specific
+.render/
+render.yaml
+
+# Miscellaneous
+*.lock
+*.prof
+*.pkl
+*.pickle
+*.h5
+*.hdf5
+*.model
+*.joblib
+*.onnx
+*.torch
+*.pt
+*.pth
+*.db
+*.sql
+*.sql.gz
+*.sql.zip
+*.cache
+*.checkpoint

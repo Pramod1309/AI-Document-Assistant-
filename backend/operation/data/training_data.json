@@ -1,0 +1,8 @@
+[
+    {"input": "Convert these images to PDF and compress to 1MB.", "output": "Your files are being processed. Please wait..."},
+    {"input": "Convert these images to PDF.", "output": "Your files are being processed. Please wait..."},
+    {"input": "Compress these images to 1MB.", "output": "Your files are being processed. Please wait..."},
+    {"input": "Convert and compress these images.", "output": "Your files are being processed. Please wait..."},
+    {"input": "Process these images.", "output": "Your files are being processed. Please wait..."},
+    {"input": "Convert these images to PDF.", "output": "Your compressed PDF is ready. Please download it."}
+]
